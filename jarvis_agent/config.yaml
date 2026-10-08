@@ -1,0 +1,72 @@
+# ---------------------------------------------------------------------------
+# JARVIS config — this file IS the permission boundary. The agent can only
+# do what's allowlisted here, regardless of what the model asks for.
+# ---------------------------------------------------------------------------
+
+ollama:
+  host: "http://localhost:11434"
+  model: "llama3.1"          # must support instruction-following JSON output
+  temperature: 0.2
+
+# Directories the filesystem tool is allowed to read/write/delete in.
+# Use absolute paths. Anything outside these is refused automatically.
+filesystem:
+  allowed_dirs:
+    - "~/jarvis_workspace"
+    - "~/Documents/jarvis"
+  # extensions the agent may never delete, even inside allowed dirs
+  protected_extensions: [".key", ".pem", ".env"]
+
+# Apps/binaries the process tool may launch or kill, by name.
+process:
+  allowed_launch:
+    - "code"
+    - "firefox"
+    - "notepad"
+  allowed_kill:
+    - "notepad"
+  # never allow killing these even if asked
+  never_kill:
+    - "explorer.exe"
+    - "systemd"
+    - "Finder"
+
+browser:
+  headless: false
+  allowed_domains: []        # empty = no restriction; add domains to whitelist-only
+
+input_control:
+  enabled: false             # flip to true only after you trust the risk gate
+
+voice:
+  enabled: false
+  stt_engine: "whisper"      # placeholder — see tools/voice.py
+  tts_engine: "piper"        # placeholder — see tools/voice.py
+
+# ---------------------------------------------------------------------------
+# Risk tiers. "low" = auto-run. "medium"/"high" = always pause and ask you,
+# via confirm.py, before executing.
+# ---------------------------------------------------------------------------
+risk_tiers:
+  low:
+    - "read_file"
+    - "list_files"
+    - "list_processes"
+    - "browser_navigate"
+    - "browser_read_text"
+    - "screenshot"
+  medium:
+    - "write_file"
+    - "launch_process"
+    - "browser_click"
+    - "browser_type"
+  high:
+    - "delete_file"
+    - "kill_process"
+    - "system_shutdown"
+    - "system_sleep"
+    - "send_keys"          # raw keyboard input, if input_control is enabled
+    - "mouse_click"         # raw mouse input, if input_control is enabled
+
+logging:
+  path: "logs/actions.log"
